@@ -8,19 +8,21 @@ import android.os.CountDownTimer
 import android.util.Log
 import android.view.*
 import com.example.pomodoro.databinding.ActivityMainBinding
+import java.text.SimpleDateFormat
 
-//val intent = Intent(applicationContext, VibeActivity::class.java)
-//startActivity(intent)
 class MainActivity : AppCompatActivity() {
     private val TAG: String = "로그"
     private lateinit var binding: ActivityMainBinding
     private var timer: CountDownTimer? = null
+    private var isStudyTime: Boolean = true
 
     companion object {
         //공부 시간.
         var studyLength: Long = 11*1000
         //쉬는 시간.
         var breakLength: Long = 6*1000
+        //현재 타이머의 남은 시간
+        var remainTime: Long = studyLength
 
         //휴식 시간 여부.
         var isStudyTime: Boolean = true
@@ -30,25 +32,68 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "MainActivity - onCreate() called")
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        //어플리케이션 실행 동안, 화면 계속 켜두게 설정.
+        //어플리케이션 실행 동안, 화면 계속 켜Timer두게 설정.
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        //시간 형식
+        val dateFormat = SimpleDateFormat("mm:ss")
 
         // 리스너.
         // startBtn을 눌렀을 때, start메서드 실행.
         binding.startBtn.setOnClickListener {
             Log.d(TAG,"MainActivity - startBtn is clicked.")
-            startTimer(timer)
-            binding.timeView.text = ((studyLength-1000)/1000).toString()
+            binding.startBtn.visibility = View.GONE
+            binding.pauseBtn.visibility = View.VISIBLE
+
+            timer = startTimer()
+            binding.timeView.text = dateFormat.format((remainTime-1000)/1000)
+        }
+        // 정지 버튼 눌렀을 때, 처음 시간으로 초기화.
+        binding.stopBtn.setOnClickListener {
+            Log.d(TAG,"MainActivity - stopBtn is clicked")
+            binding.startBtn.visibility = View.VISIBLE
+            binding.pauseBtn.visibility = View.GONE
+
+            timer?.apply {
+                stopTimer(this)
+            }
+
+            if (isStudyTime) {
+                binding.timeView.text = dateFormat.format((studyLength-1000)/1000)
+            } else {
+                binding.timeView.text = dateFormat.format((breakLength-1000)/1000)
+            }
+        }
+
+        //일시 정지 버튼 눌렀을 때, 타이머 중지하고 재개하면 시간 이어서쭉
+        binding.pauseBtn.setOnClickListener {
+            Log.d(TAG,"MainActivity - pauseBtn is clicked")
+            binding.startBtn.visibility = View.VISIBLE
+            binding.pauseBtn.visibility = View.GONE
+
+            timer?.apply {
+                this.cancel()
+            }
         }
     }
 
-    fun startTimer(timer: CountDownTimer?) {
+    private fun stopTimer(timer: CountDownTimer?) {
+        Log.d(TAG,"MainActivity - stopTimer() called")
+        timer!!.cancel()
+
+        if (isStudyTime) {
+            remainTime = studyLength
+        } else {
+            remainTime = breakLength
+        }
+    }
+
+    fun startTimer(): CountDownTimer {
         Log.d(TAG,"MainActivity - startTimer() called")
-        var remainTime = studyLength
-        var timer = object: CountDownTimer(studyLength, 1000) {
+        val dateFormat = SimpleDateFormat.getInstance()
+        var timer = object: CountDownTimer(remainTime, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 Log.d(TAG,"MainActivity - onTick() called")
-                binding.timeView.text = ((remainTime-1000)/1000).toString()
+                binding.timeView.text = dateFormat.format((remainTime-1000)/1000)
                 remainTime -= 1000
             }
 
@@ -57,20 +102,26 @@ class MainActivity : AppCompatActivity() {
                 val intent: Intent = Intent(applicationContext, VibeActivity::class.java)
                 startActivity(intent)
 
-                var temp = studyLength
-                studyLength = breakLength
-                breakLength = temp
-                binding.timeView.text = ((studyLength-1000)/1000).toString()
+                //공부 시간이 끝났으니, 휴식 시간이 남은 시간이 됨.
+                if (isStudyTime) {
+                    remainTime = breakLength
+                } else {
+                    remainTime = studyLength
+                }
+                isStudyTime = !isStudyTime
+
+                binding.timeView.text = dateFormat.format((remainTime-1000)/1000)
+                binding.pauseBtn.visibility = View.GONE
+                binding.startBtn.visibility = View.VISIBLE
             }
         }
         timer.start()
+        return timer
     }
-//    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-//        menuInflater.inflate(R.menu.options_menu, menu)
-//        return true
-//    }
-//
-//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-//        return super.onOptionsItemSelected(item)
-//    }
+    fun makeMilSecToMinSec(time: Long): String {
+        var min = time/1000/60
+        var sec = (time % (1000*60)) / 1000
+
+        return min.toString() + "분"+sec+"초"
+    }
 }
