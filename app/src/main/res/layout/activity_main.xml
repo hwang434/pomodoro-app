@@ -7,6 +7,16 @@
         android:layout_height="match_parent"
         tools:context=".MainActivity">
         <TextView
+            android:id="@+id/pomodoroStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="30sp"
+            android:text="아무것도 안함"
+            android:layout_marginTop="30dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <TextView
             android:id="@+id/timeView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

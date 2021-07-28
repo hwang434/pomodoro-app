@@ -8,6 +8,7 @@ import android.os.CountDownTimer
 import android.util.Log
 import android.view.*
 import com.example.pomodoro.databinding.ActivityMainBinding
+import java.lang.StringBuilder
 import java.text.SimpleDateFormat
 
 class MainActivity : AppCompatActivity() {
@@ -18,9 +19,9 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         //공부 시간.
-        var studyLength: Long = 11*1000
+        var studyLength: Long = 25*60*1000+1000
         //쉬는 시간.
-        var breakLength: Long = 6*1000
+        var breakLength: Long = 5*60*1000+1000
         //현재 타이머의 남은 시간
         var remainTime: Long = studyLength
 
@@ -45,7 +46,7 @@ class MainActivity : AppCompatActivity() {
             binding.pauseBtn.visibility = View.VISIBLE
 
             timer = startTimer()
-            binding.timeView.text = dateFormat.format((remainTime-1000)/1000)
+            binding.timeView.text = makeMilSecToMinSec(remainTime-1000)
         }
         // 정지 버튼 눌렀을 때, 처음 시간으로 초기화.
         binding.stopBtn.setOnClickListener {
@@ -58,9 +59,9 @@ class MainActivity : AppCompatActivity() {
             }
 
             if (isStudyTime) {
-                binding.timeView.text = dateFormat.format((studyLength-1000)/1000)
+                binding.timeView.text = makeMilSecToMinSec(studyLength-1000)
             } else {
-                binding.timeView.text = dateFormat.format((breakLength-1000)/1000)
+                binding.timeView.text = makeMilSecToMinSec(breakLength-1000)
             }
         }
 
@@ -89,11 +90,13 @@ class MainActivity : AppCompatActivity() {
 
     fun startTimer(): CountDownTimer {
         Log.d(TAG,"MainActivity - startTimer() called")
-        val dateFormat = SimpleDateFormat.getInstance()
+        if (isStudyTime) binding.pomodoroStatus.text = "공부중"
+        else binding.pomodoroStatus.text = "휴식중"
+
         var timer = object: CountDownTimer(remainTime, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 Log.d(TAG,"MainActivity - onTick() called")
-                binding.timeView.text = dateFormat.format((remainTime-1000)/1000)
+                binding.timeView.text = makeMilSecToMinSec(remainTime-1000)
                 remainTime -= 1000
             }
 
@@ -105,12 +108,14 @@ class MainActivity : AppCompatActivity() {
                 //공부 시간이 끝났으니, 휴식 시간이 남은 시간이 됨.
                 if (isStudyTime) {
                     remainTime = breakLength
+                    binding.pomodoroStatus.text = "휴식중"
                 } else {
                     remainTime = studyLength
+                    binding.pomodoroStatus.text = "공부중"
                 }
                 isStudyTime = !isStudyTime
 
-                binding.timeView.text = dateFormat.format((remainTime-1000)/1000)
+                binding.timeView.text = makeMilSecToMinSec(remainTime-1000)
                 binding.pauseBtn.visibility = View.GONE
                 binding.startBtn.visibility = View.VISIBLE
             }
@@ -119,9 +124,22 @@ class MainActivity : AppCompatActivity() {
         return timer
     }
     fun makeMilSecToMinSec(time: Long): String {
+        val timeFormated = StringBuilder()
         var min = time/1000/60
         var sec = (time % (1000*60)) / 1000
 
-        return min.toString() + "분"+sec+"초"
+        if (min < 10) {
+            timeFormated.append(0)
+        }
+        timeFormated.append(min)
+
+        timeFormated.append(":")
+
+        if (sec < 10) {
+            timeFormated.append(0)
+        }
+        timeFormated.append(sec)
+
+        return timeFormated.toString()
     }
 }
