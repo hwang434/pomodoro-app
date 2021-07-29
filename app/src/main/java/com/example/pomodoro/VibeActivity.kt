@@ -20,6 +20,8 @@ class VibeActivity: AppCompatActivity() {
         vibrator.vibrate(pattern,0)
 
         binding.finishBtn.setOnClickListener {
+            //진동이 인텐트를 종료해도 계속 반복돼서, cancle 해주기로함.
+            vibrator.cancel()
             this.finish()
         }
     }
