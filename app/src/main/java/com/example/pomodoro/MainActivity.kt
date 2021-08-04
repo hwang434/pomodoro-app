@@ -1,37 +1,22 @@
 package com.example.pomodoro
 
 import android.content.Intent
-import android.databinding.DataBindingUtil
-import android.support.v7.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
 import android.os.Bundle
 import android.os.CountDownTimer
+import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.view.*
+import androidx.lifecycle.ViewModelProvider
 import com.example.pomodoro.databinding.ActivityMainBinding
+import com.example.pomodoro.viewmodels.TimerViewModel
 import java.lang.StringBuilder
-import java.text.SimpleDateFormat
 
 class MainActivity : AppCompatActivity() {
     private val TAG: String = "로그"
     private lateinit var binding: ActivityMainBinding
-    private var timer: CountDownTimer? = null
-    private var isStudyTime: Boolean = true
-
-    companion object {
-        //공부 시간.
-        var studyLength: Long = 25*60*1000+1000
-        //테스트용 시간 10초.
-//        var studyLength: Long = 10*1000+1000
-        //쉬는 시간.
-        var breakLength: Long = 5*1000+1000
-        //테스트용 시간 3초
-//        var breakLength: Long = 3*1000+1000
-        //현재 타이머의 남은 시간
-        var remainTime: Long = studyLength
-
-        //휴식 시간 여부.
-        var isStudyTime: Boolean = true
-    }
+    private lateinit var viewModel: TimerViewModel
+    private lateinit var timer: CountDownTimer
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG, "MainActivity - onCreate() called")
@@ -39,6 +24,12 @@ class MainActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         //어플리케이션 실행 동안, 화면 계속 켜Timer두게 설정.
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        //뷰모델 초기화ㅣ
+        viewModel = ViewModelProvider(this).get(TimerViewModel::class.java)
+        //onDestroy하고 다시 onCreate하면 바로 화면 시간 나옴.
+        binding.timeView.text = makeMilSecToMinSec(viewModel.remainTime)
+
+        makeTimer()
 
         // 리스너.
         // startBtn을 눌렀을 때, start메서드 실행.
@@ -46,18 +37,20 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG,"MainActivity - startBtn is clicked.")
             binding.startBtn.visibility = View.GONE
             binding.pauseBtn.visibility = View.VISIBLE
+            binding.pomodoroStatus.text = "공부중"
 
-            timer = startTimer()
-
-            binding.timeView.text = makeMilSecToMinSec(remainTime-1000)
+            startTimer()
+            binding.timeView.text = makeMilSecToMinSec(viewModel.remainTime)
         }
         // 정지 버튼 눌렀을 때, 처음 시간으로 초기화.
         binding.stopBtn.setOnClickListener {
             Log.d(TAG,"MainActivity - stopBtn is clicked")
             binding.startBtn.visibility = View.VISIBLE
             binding.pauseBtn.visibility = View.GONE
+            binding.pomodoroStatus.text = "아무것도 안함"
 
             stopTimer()
+            binding.timeView.text = makeMilSecToMinSec(viewModel.remainTime)
         }
 
         //일시 정지 버튼 눌렀을 때, 타이머 중지하고 재개하면 시간 이어서쭉
@@ -65,10 +58,13 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG,"MainActivity - pauseBtn is clicked")
             binding.startBtn.visibility = View.VISIBLE
             binding.pauseBtn.visibility = View.GONE
+            binding.pomodoroStatus.text = "아무것도 안함"
 
             pauseTimer()
+            binding.timeView.text = makeMilSecToMinSec(viewModel.remainTime)
         }
     }
+
     override fun onStart() {
         super.onStart()
         Log.d(TAG,"MainActivity - onStart() called")
@@ -97,18 +93,16 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG,"MainActivity - onDestroy() called")
+        pauseTimer()
     }
 
-    //타이머 관련 기능들.
-    fun startTimer(): CountDownTimer {
-        Log.d(TAG,"MainActivity - startTimer() called")
-        binding.pomodoroStatus.text = if(isStudyTime) "공부중" else "휴식중"
-
-        var timer = object: CountDownTimer(remainTime, 1000) {
+    fun makeTimer() {
+        Log.d(TAG,"MainActivity - makeTimer() called\nremainTime : ${viewModel.remainTime}")
+        timer = object: CountDownTimer(viewModel.remainTime, 1000) {
             override fun onTick(millisUntilFinished: Long) {
-                Log.d(TAG,"MainActivity - onTick() called")
-                binding.timeView.text = makeMilSecToMinSec(remainTime-1000)
-                remainTime -= 1000
+                Log.d(TAG,"MainActivity - onTick() called time : ${viewModel.remainTime}")
+                binding.timeView.text = makeMilSecToMinSec(viewModel.remainTime)
+                viewModel.remainTime -= 1000
             }
 
             override fun onFinish() {
@@ -117,38 +111,43 @@ class MainActivity : AppCompatActivity() {
                 startActivity(intent)
 
                 //공부 시간이 끝났으니, 휴식 시간이 남은 시간이 됨.
-                if (isStudyTime) {
-                    remainTime = breakLength
+                if (viewModel.isStudyTime) {
+                    viewModel.remainTime = viewModel.breakLength
                     binding.pomodoroStatus.text = "휴식중"
                 } else {
-                    remainTime = studyLength
+                    viewModel.remainTime = viewModel.studyLength
                     binding.pomodoroStatus.text = "공부중"
                 }
-                isStudyTime = !isStudyTime
+                viewModel.isStudyTime = !viewModel.isStudyTime
 
-                binding.timeView.text = makeMilSecToMinSec(remainTime-1000)
+                binding.timeView.text = makeMilSecToMinSec(viewModel.remainTime)
                 binding.pauseBtn.visibility = View.GONE
                 binding.startBtn.visibility = View.VISIBLE
             }
         }
+    }
+    //타이머 관련 기능들.
+    fun startTimer() {
+        Log.d(TAG,"MainActivity - startTimer() called")
+        makeTimer()
         timer.start()
-        return timer
     }
 
     private fun stopTimer() {
         Log.d(TAG,"MainActivity - stopTimer() called")
         timer?.cancel()
 
-        if (isStudyTime) {
-            remainTime = studyLength
-            binding.timeView.text = makeMilSecToMinSec(studyLength-1000)
+        if (viewModel.isStudyTime) {
+            viewModel.remainTime = viewModel.studyLength
+            binding.timeView.text = makeMilSecToMinSec(viewModel.studyLength)
         } else {
-            remainTime = breakLength
-            binding.timeView.text = makeMilSecToMinSec(breakLength-1000)
+            viewModel.remainTime = viewModel.breakLength
+            binding.timeView.text = makeMilSecToMinSec(viewModel.breakLength)
         }
     }
 
     fun pauseTimer() {
+        Log.d(TAG,"MainActivity - pauseTimer() called")
         timer?.cancel()
     }
 
