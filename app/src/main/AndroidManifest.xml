@@ -17,5 +17,13 @@
         </activity>
         <activity android:name=".VibeActivity">
         </activity>
+        <receiver android:name=".receiver.AlarmReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="com.example.pomodoro.ALARM_START"/>
+            </intent-filter>
+        </receiver>
+        <service android:name="com.example.pomodoro.service.AlarmService"
+            android:enabled="true">
+        </service>
     </application>
 </manifest>
