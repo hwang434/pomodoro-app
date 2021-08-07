@@ -5,65 +5,85 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".MainActivity">
-
+        tools:context=".views.MainActivity"
+        android:background="#000000"
+        >
         <TextView
             android:id="@+id/pomodoroStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="30sp"
+            android:layout_marginTop="160dp"
             android:text="아무것도 안함"
-            android:layout_marginTop="30dp"
+            android:textColor="#D6E8D3"
+            android:textSize="30sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"/>
+
         <TextView
             android:id="@+id/timeView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="100dp"
+            android:layout_marginTop="48dp"
+            android:ems="10"
+            android:gravity="center_horizontal"
+            android:inputType="time"
             android:text="뽀모도로"
             android:textAlignment="center"
-            android:ems="10"
             android:textSize="50sp"
-            android:inputType="time"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:gravity="center_horizontal" />
+            android:textColor="#DDE2E0"/>
+
         <Button
             android:id="@+id/startBtn"
-            android:layout_width="150dp"
+            style="@style/button_style"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="시작"
-            android:textSize="20sp"
-            android:layout_marginTop="50dp"
-            android:layout_marginLeft="20dp"
-            android:background="@android:color/holo_blue_light"
+            android:layout_marginTop="136dp"
+            android:text="@string/timer_start_btn"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/timeView"
-            app:layout_constraintStart_toStartOf="parent"/>
+            android:background="@drawable/rounded_button" />
+
         <Button
             android:id="@+id/pauseBtn"
-            android:layout_width="150dp"
+            style="@style/button_style"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="48dp"
+            android:background="@drawable/rounded_button"
             android:text="일시정지"
-            android:textSize="20sp"
-            android:background="@android:color/holo_green_light"
-            android:layout_marginTop="50dp"
-            android:layout_marginLeft="20dp"
-            app:layout_constraintTop_toBottomOf="@id/timeView"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            android:visibility="gone"/>
+            app:layout_constraintTop_toBottomOf="@+id/pomodoroStatus" />
+
         <Button
             android:id="@+id/stopBtn"
-            android:layout_width="150dp"
+            style="@style/button_style"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/rounded_button"
             android:text="정지"
-            android:background="@android:color/holo_red_dark"
-            android:textSize="20sp"
-            android:layout_marginTop="50dp"
-            android:layout_marginRight="20dp"
-            app:layout_constraintTop_toBottomOf="@id/timeView"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            android:layout_marginTop="30dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/startBtn" />
+
+        <Button
+            android:id="@+id/stopVibration"
+            style="@style/button_style"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="진동 멈춰"
+            android:layout_marginTop="30dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/stopBtn"
+            android:background="@drawable/rounded_button"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

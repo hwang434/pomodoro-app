@@ -2,27 +2,36 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.pomodoro">
     <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.Pomodoro">
-        <activity android:name=".MainActivity">
+        <!--Activities-->
+        <activity android:name=".views.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".VibeActivity">
+        <activity android:name=".views.VibeActivity">
         </activity>
-        <receiver android:name=".receiver.AlarmReceiver" android:exported="true">
+
+        <!--Receivers-->
+        <receiver android:name=".receiver.AlarmReceiver"
+            android:exported="true"
+            android:enabled="true">
             <intent-filter>
                 <action android:name="com.example.pomodoro.ALARM_START"/>
             </intent-filter>
         </receiver>
-        <service android:name="com.example.pomodoro.service.AlarmService"
+
+        <!--Services-->
+        <service android:name=".service.VibrationService"
             android:enabled="true">
         </service>
     </application>
