@@ -42,8 +42,12 @@ class MainActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         // 어플리케이션 실행하는 동안 화면 계속 켜지게함.
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        //뷰모델 초기화
+        // 뷰모델 초기화
         viewModel = ViewModelProvider(this).get(TimerViewModel::class.java)
+
+        // binding의 뷰모델 설정하기
+        binding.timerViewModel = viewModel
+        binding.lifecycleOwner = this
 
         // 동적으로 리시버 등록하기.
         val myReceiver: AlarmReceiver = AlarmReceiver()
@@ -60,16 +64,6 @@ class MainActivity : AppCompatActivity() {
 
         alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-        // 라이브데이터 관찰자 설정.
-        // 남은시간 관찰자 설정.
-        viewModel.remainTime.observe(this, Observer { time ->
-            binding.timeView.text = makeMilSecToMinSec(time)
-            if (time == 0L) {
-                Log.d(TAG,"time == 0")
-                binding.pauseBtn.visibility = View.INVISIBLE
-                binding.startBtn.visibility = View.VISIBLE
-            }
-        })
         // 공부 중인지 관찰자 설정
         viewModel.isStudyTime.observe(this, Observer { isStudyTime ->
             Log.d(TAG,"is studyTime is changed.")
@@ -125,7 +119,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startTimer() {
-        Log.d(TAG,"MainActivity - startTimer() called Build.VERSION : ${Build.VERSION.SDK_INT}")
+        Log.d(TAG,"MainActivity - startTimer() called")
         viewModel.makeTimer()
         viewModel.startTimer()
     }
@@ -140,24 +134,6 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG,"MainActivity - pauseTimer() called")
         alarmManager.cancel(mPendingIntent)
         viewModel.pauseTimer()
-    }
-
-    //시간을 디스프레이에 보여줄 형식을 만들어주는 메소드.
-    //mm:ss 형식임.
-    private fun makeMilSecToMinSec(time: Long): String {
-        val timeFormated = StringBuilder()
-        var min = time/1000/60
-        var sec = (time % (1000*60)) / 1000
-
-        //0~9분이면 0 앞에 붙여서 0m:ss 처리.
-        if (min < 10) timeFormated.append(0)
-        timeFormated.append(min)
-        timeFormated.append(":")
-        //0~9초면 0 앞에 붙여서 mm:0s 처리.
-        if (sec < 10) timeFormated.append(0)
-        timeFormated.append(sec)
-
-        return timeFormated.toString()
     }
 
     override fun onPause() {

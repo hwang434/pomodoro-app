@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.pomodoro.service.VibrationService
+import java.lang.StringBuilder
 
 class TimerViewModel: ViewModel() {
     private val TAG: String = "로그"
@@ -25,12 +26,16 @@ class TimerViewModel: ViewModel() {
     private val _isTimerRunning: MutableLiveData<Boolean> = MutableLiveData()
     val isTimerRunning: LiveData<Boolean>
         get() = _isTimerRunning
+    private val _timeString: MutableLiveData<String> = MutableLiveData()
+    val timeString: LiveData<String>
+        get() = _timeString
     init {
         studyLength = 10*1000
         breakLength = 5*1000
         _remainTime.value = studyLength
         _isStudyTime.value = true
         _isTimerRunning.value = false
+        makeMilSecToMinSec(remainTime.value!!)
         makeTimer()
     }
     // 공부 시간이 끝나면 isStudyTime이 false가 됨.
@@ -53,14 +58,16 @@ class TimerViewModel: ViewModel() {
         timer = object: CountDownTimer(_remainTime.value!!, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 Log.d(TAG,"TimerViewModel - onTick() called remainTime : ${remainTime.value}")
-                _remainTime.value = _remainTime.value!!.minus(1000)
+                _remainTime?.apply {
+                    this.value = this.value?.minus(1000)
+                    makeMilSecToMinSec(time = this.value!!)
+                }
             }
 
             override fun onFinish() {
                 Log.d(TAG,"TimerViewModel - onFinish() called")
-                _remainTime.value = _remainTime.value!!.minus(1000)
-
                 // 타이머가 끝나므로 공부 시간의 true false가 반대가 됨.
+                _remainTime.value = _remainTime.value?.minus(1000)
                 _isStudyTime.value = !_isStudyTime.value!!
 
                 // 공부시간이 finish하므로 남은 시간이 휴식 시간이 됨.
@@ -69,6 +76,12 @@ class TimerViewModel: ViewModel() {
                 } else {
                     _remainTime.value = breakLength
                 }
+
+                _remainTime?.apply {
+                    makeMilSecToMinSec(time = this.value!!)
+                }
+                // 타이머가 종료됐으므로 false(타이머가 돌아가고 있지 않음)로 만듬.
+                _isTimerRunning.value = false
             }
         }
     }
@@ -97,5 +110,23 @@ class TimerViewModel: ViewModel() {
     }
     override fun onCleared() {
         super.onCleared()
+    }
+
+    //시간을 디스프레이에 보여줄 형식을 만들어주는 메소드.
+    //mm:ss 형식임.
+    fun makeMilSecToMinSec(time: Long) {
+        val timeFormated = StringBuilder()
+        var min = time/1000/60
+        var sec = (time % (1000*60)) / 1000
+
+        //0~9분이면 0 앞에 붙여서 0m:ss 처리.
+        if (min < 10) timeFormated.append(0)
+        timeFormated.append(min)
+        timeFormated.append(":")
+        //0~9초면 0 앞에 붙여서 mm:0s 처리.
+        if (sec < 10) timeFormated.append(0)
+        timeFormated.append(sec)
+
+        _timeString.value = timeFormated.toString()
     }
 }

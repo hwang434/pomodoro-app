@@ -2,12 +2,18 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
+    <data>
+        <variable
+            name="timerViewModel"
+            type="com.example.pomodoro.viewmodels.TimerViewModel" />
+    </data>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".views.MainActivity"
         android:background="#000000"
         >
+
         <TextView
             android:id="@+id/pomodoroStatus"
             android:layout_width="wrap_content"
@@ -28,7 +34,7 @@
             android:ems="10"
             android:gravity="center_horizontal"
             android:inputType="time"
-            android:text="뽀모도로"
+            android:text="@{timerViewModel.timeString}"
             android:textAlignment="center"
             android:textSize="50sp"
             app:layout_constraintEnd_toEndOf="parent"
