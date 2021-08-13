@@ -30,7 +30,9 @@ class TimerViewModel: ViewModel() {
     val timeString: LiveData<String>
         get() = _timeString
     init {
+        // 공부 시간 설정.
         studyLength = 10*1000
+        // 쉬는 시간 설정.
         breakLength = 5*1000
         _remainTime.value = studyLength
         _isStudyTime.value = true
@@ -38,19 +40,10 @@ class TimerViewModel: ViewModel() {
         makeMilSecToMinSec(remainTime.value!!)
         makeTimer()
     }
-    // 공부 시간이 끝나면 isStudyTime이 false가 됨.
-    fun onStudyFinish() {
-        _isStudyTime.value = false
-    }
 
-    // 공부 시간이 끝나고, 메소드가 다 끝나면 다시 true가 됨.
-    fun onStudyFinishComplete() {
-        _isStudyTime.value = true
-    }
-
-    // 남은 시간 바꾸는 메서드
-    fun changeRemainTime(time: Long) {
-        _remainTime.value = time
+    // viewModel 사라지기 전에 불리는 메소드
+    override fun onCleared() {
+        super.onCleared()
     }
 
     // 카운트 다운 타이머 객체 만들기.
@@ -78,7 +71,7 @@ class TimerViewModel: ViewModel() {
                 }
 
                 _remainTime?.apply {
-                    makeMilSecToMinSec(time = this.value!!)
+                    makeMilSecToMinSec(this.value!!)
                 }
                 // 타이머가 종료됐으므로 false(타이머가 돌아가고 있지 않음)로 만듬.
                 _isTimerRunning.value = false
@@ -103,13 +96,11 @@ class TimerViewModel: ViewModel() {
         }
         _isTimerRunning.value = false
     }
+
     // 타이머 일시 정지 (시간 기록)
     fun pauseTimer() {
         timer.cancel()
         _isTimerRunning.value = false
-    }
-    override fun onCleared() {
-        super.onCleared()
     }
 
     //시간을 디스프레이에 보여줄 형식을 만들어주는 메소드.

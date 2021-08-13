@@ -1,5 +1,4 @@
 <resources>
     <string name="app_name">pomodoro</string>
     <string name="timer_start_btn">시작</string>
-    <string name="time_format"></string>
 </resources>
