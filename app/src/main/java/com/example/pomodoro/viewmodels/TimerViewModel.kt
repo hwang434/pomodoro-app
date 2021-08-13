@@ -31,9 +31,9 @@ class TimerViewModel: ViewModel() {
         get() = _timeString
     init {
         // 공부 시간 설정.
-        studyLength = 10*1000
+        studyLength = 25*60*1000
         // 쉬는 시간 설정.
-        breakLength = 5*1000
+        breakLength = 5*60*1000
         _remainTime.value = studyLength
         _isStudyTime.value = true
         _isTimerRunning.value = false
