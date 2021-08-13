@@ -23,7 +23,7 @@ class VibrationService: Service(){
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d(TAG,"AlarmService - onStartCommand() called")
-        Toast.makeText(this, "Vibrator on!", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "시간이 다했어요~", Toast.LENGTH_LONG).show()
 
         vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
         musicPlayer = MediaPlayer.create(this, R.raw.ppippi)

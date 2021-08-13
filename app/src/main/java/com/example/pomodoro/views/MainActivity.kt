@@ -109,50 +109,13 @@ class MainActivity : AppCompatActivity() {
 
             pauseTimer()
         }
-
-        // 일시적으로 만든 메인에서 진동 멈추기
-        binding.stopVibration.setOnClickListener {
-            Toast.makeText(this, "vibrator cancle button is clicked.",Toast.LENGTH_SHORT).show()
-            val vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
-            vibrator.cancel()
-        }
     }
 
     private fun startTimer() {
         Log.d(TAG,"MainActivity - startTimer() called")
         viewModel.makeTimer()
         viewModel.startTimer()
-    }
 
-    private fun stopTimer() {
-        Log.d(TAG,"MainActivity - stopTimer() called")
-        alarmManager.cancel(mPendingIntent)
-        viewModel.stopTimer()
-    }
-
-    private fun pauseTimer() {
-        Log.d(TAG,"MainActivity - pauseTimer() called")
-        alarmManager.cancel(mPendingIntent)
-        viewModel.pauseTimer()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Log.d(TAG,"MainActivity - onPause() called")
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.d(TAG,"MainActivity - onStop() called")
-
-        // 공부 시간이었으면 휴식 시간으로 설정되어 있어야함.
-        viewModel.stopTimer()
-
-        // 백그라운드에서만 alarmManager로 알림 울리게 하는 게 나음.
-        // foreground에선 정확하게 타이머로 울리게 하고.
-        // 이게 타이머가 돌아가는 중에만 onStop했을 때 알람이 울려야하는데
-        // 타이머를 시작 안하고 화면 꺼도 onStop이 되면서 알람이 울림. 알림이 진행 중인가를 viewModel에 변수로 선언하는 게 좋을 거 같음.
-        // 진행 중이어야 밑에 알람매니저가 실행 되게해야함.
         if (viewModel.isTimerRunning.value == true) {
             if (Build.VERSION.SDK_INT < 23) {
                 if (Build.VERSION.SDK_INT >= 19) {
@@ -176,6 +139,28 @@ class MainActivity : AppCompatActivity() {
                 )
             }
         }
+    }
+
+    private fun stopTimer() {
+        Log.d(TAG,"MainActivity - stopTimer() called")
+        alarmManager.cancel(mPendingIntent)
+        viewModel.stopTimer()
+    }
+
+    private fun pauseTimer() {
+        Log.d(TAG,"MainActivity - pauseTimer() called")
+        alarmManager.cancel(mPendingIntent)
+        viewModel.pauseTimer()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG,"MainActivity - onPause() called")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG,"MainActivity - onStop() called")
     }
 
     override fun onRestart() {
