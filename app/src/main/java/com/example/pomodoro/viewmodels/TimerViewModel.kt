@@ -3,10 +3,12 @@ package com.example.pomodoro.viewmodels
 import android.content.Intent
 import android.os.CountDownTimer
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.pomodoro.service.VibrationService
+import com.example.pomodoro.views.MainActivity
 import java.lang.StringBuilder
 
 class TimerViewModel: ViewModel() {
@@ -33,7 +35,7 @@ class TimerViewModel: ViewModel() {
         // 공부 시간 설정.
         studyLength = 25*60*1000
         // 쉬는 시간 설정.
-        breakLength = 5*60*1000
+        breakLength = 10*1000
         _remainTime.value = studyLength
         _isStudyTime.value = true
         _isTimerRunning.value = false
@@ -51,6 +53,7 @@ class TimerViewModel: ViewModel() {
         timer = object: CountDownTimer(_remainTime.value!!, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 Log.d(TAG,"TimerViewModel - onTick() called remainTime : ${remainTime.value}")
+
                 _remainTime?.apply {
                     this.value = this.value?.minus(1000)
                     makeMilSecToMinSec(time = this.value!!)
@@ -60,7 +63,7 @@ class TimerViewModel: ViewModel() {
             override fun onFinish() {
                 Log.d(TAG,"TimerViewModel - onFinish() called")
                 // 타이머가 끝나므로 공부 시간의 true false가 반대가 됨.
-                _remainTime.value = _remainTime.value?.minus(1000)
+                _remainTime.postValue(_remainTime.value?.minus(1000))
                 _isStudyTime.value = !_isStudyTime.value!!
 
                 // 공부시간이 finish하므로 남은 시간이 휴식 시간이 됨.

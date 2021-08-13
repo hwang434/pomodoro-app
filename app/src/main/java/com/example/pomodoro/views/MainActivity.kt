@@ -162,6 +162,7 @@ class MainActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         Log.d(TAG,"MainActivity - onStop() called")
+        viewModel.remainTime.observeForever(Observer { it -> viewModel.makeMilSecToMinSec(viewModel.remainTime.value!!)})
     }
 
     override fun onRestart() {
