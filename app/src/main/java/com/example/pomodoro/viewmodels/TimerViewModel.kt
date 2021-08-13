@@ -94,6 +94,10 @@ class TimerViewModel: ViewModel() {
                 _remainTime.value = breakLength
             }
         }
+
+        _remainTime?.apply {
+            makeMilSecToMinSec(this.value!!)
+        }
         _isTimerRunning.value = false
     }
 

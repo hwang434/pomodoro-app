@@ -145,6 +145,7 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG,"MainActivity - stopTimer() called")
         alarmManager.cancel(mPendingIntent)
         viewModel.stopTimer()
+        binding.timeView.text = viewModel.timeString.value
     }
 
     private fun pauseTimer() {
