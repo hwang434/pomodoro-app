@@ -20,16 +20,7 @@ class AlarmReceiver: BroadcastReceiver()  {
     override fun onReceive(context: Context?, intent: Intent?) {
         Log.d(TAG,"AlarmReceiver - onReceive() called")
 
-        val dialogBuilder = AlertDialog.Builder(context!!)
-        dialogBuilder.setTitle("타이틀")
-            .setMessage("메시지")
-            .setPositiveButton("진동 끄기", DialogInterface.OnClickListener { dialog, which ->
-                val vibrator = context.getSystemService(VIBRATOR_SERVICE) as Vibrator
-                vibrator.cancel()
-            })
-        dialogBuilder.create().show()
-
         val serviceIntent = Intent(context, VibrationService::class.java)
-        context.startService(serviceIntent)
+        context?.startService(serviceIntent)
     }
 }

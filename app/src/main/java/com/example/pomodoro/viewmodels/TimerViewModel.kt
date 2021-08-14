@@ -35,7 +35,7 @@ class TimerViewModel: ViewModel() {
         // 공부 시간 설정.
         studyLength = 25*60*1000
         // 쉬는 시간 설정.
-        breakLength = 10*1000
+        breakLength = 5*60*1000
         _remainTime.value = studyLength
         _isStudyTime.value = true
         _isTimerRunning.value = false
@@ -46,6 +46,14 @@ class TimerViewModel: ViewModel() {
     // viewModel 사라지기 전에 불리는 메소드
     override fun onCleared() {
         super.onCleared()
+        Log.d(TAG,"TimerViewModel - onCleared() called")
+    }
+
+    // 남은 시간을 화면에서 설정하기 위해 만들 셋.
+    fun setRemainTime(timeString: String) {
+        val list = timeString.split(":")
+        _remainTime.value = 1000*(list.get(0).toLong() * 60 + list.get(1).toLong())
+        makeMilSecToMinSec(_remainTime.value!!)
     }
 
     // 카운트 다운 타이머 객체 만들기.
@@ -54,16 +62,17 @@ class TimerViewModel: ViewModel() {
             override fun onTick(millisUntilFinished: Long) {
                 Log.d(TAG,"TimerViewModel - onTick() called remainTime : ${remainTime.value}")
 
-                _remainTime?.apply {
-                    this.value = this.value?.minus(1000)
-                    makeMilSecToMinSec(time = this.value!!)
+                _remainTime.apply {
+                    _remainTime.value = _remainTime.value!! - 1000
+//                    makeMilSecToMinSec(time = this.value!!)
                 }
             }
 
             override fun onFinish() {
                 Log.d(TAG,"TimerViewModel - onFinish() called")
                 // 타이머가 끝나므로 공부 시간의 true false가 반대가 됨.
-                _remainTime.postValue(_remainTime.value?.minus(1000))
+                _remainTime.value = _remainTime.value!! - 1000
+                // 공부시간이면 휴식 시간이 되고, 휴식 시간이면 공부시간이됨.
                 _isStudyTime.value = !_isStudyTime.value!!
 
                 // 공부시간이 finish하므로 남은 시간이 휴식 시간이 됨.
@@ -73,8 +82,8 @@ class TimerViewModel: ViewModel() {
                     _remainTime.value = breakLength
                 }
 
-                _remainTime?.apply {
-                    makeMilSecToMinSec(this.value!!)
+                _remainTime.apply {
+//                    makeMilSecToMinSec(this.value!!)
                 }
                 // 타이머가 종료됐으므로 false(타이머가 돌아가고 있지 않음)로 만듬.
                 _isTimerRunning.value = false
@@ -83,6 +92,7 @@ class TimerViewModel: ViewModel() {
     }
     // 타이머 시간 실행하기.
     fun startTimer() {
+        makeTimer()
         timer.start()
         _isTimerRunning.value = true
     }
@@ -98,9 +108,7 @@ class TimerViewModel: ViewModel() {
             }
         }
 
-        _remainTime?.apply {
-            makeMilSecToMinSec(this.value!!)
-        }
+        makeMilSecToMinSec(_remainTime.value!!)
         _isTimerRunning.value = false
     }
 

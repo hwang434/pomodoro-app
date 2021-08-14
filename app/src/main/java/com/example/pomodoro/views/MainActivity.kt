@@ -83,6 +83,16 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+        //  observeForever 설정.
+        viewModel.timeString.observeForever(Observer { it ->
+            binding.timeView.text = it
+        })
+
+        //
+        viewModel.remainTime.observeForever(Observer { it ->
+            viewModel.makeMilSecToMinSec(it)
+        })
+
         // 리스너.
         // startBtn을 눌렀을 때, start메서드 실행.
         binding.startBtn.setOnClickListener {
@@ -109,8 +119,44 @@ class MainActivity : AppCompatActivity() {
 
             pauseTimer()
         }
+        // 타이머 시각 누르면 시간 설정 창이 나옴.
+        binding.timeView.setOnClickListener { it ->
+            Log.d(TAG,"MainActivity - timeView is clicked")
+//            binding.editTime.visibility = View.VISIBLE
+        }
+
+    }
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG,"MainActivity - onStart() called")
     }
 
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG,"MainActivity - onPause() called")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG,"MainActivity - onStop() called")
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        Log.d(TAG,"MainActivity - onRestart() called")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG,"MainActivity - onResume() called")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG,"MainActivity - onDestroy() called")
+        viewModel.stopTimer()
+        alarmManager.cancel(mPendingIntent)
+    }
     private fun startTimer() {
         Log.d(TAG,"MainActivity - startTimer() called")
         viewModel.makeTimer()
@@ -152,36 +198,5 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG,"MainActivity - pauseTimer() called")
         alarmManager.cancel(mPendingIntent)
         viewModel.pauseTimer()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Log.d(TAG,"MainActivity - onPause() called")
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.d(TAG,"MainActivity - onStop() called")
-        viewModel.remainTime.observeForever(Observer { it -> viewModel.makeMilSecToMinSec(viewModel.remainTime.value!!)})
-    }
-
-    override fun onRestart() {
-        super.onRestart()
-        Log.d(TAG,"MainActivity - onRestart() called")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d(TAG,"MainActivity - onDestroy() called")
-        pauseTimer()
-    }
-    override fun onStart() {
-        super.onStart()
-        Log.d(TAG,"MainActivity - onStart() called")
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Log.d(TAG,"MainActivity - onResume() called")
     }
 }
