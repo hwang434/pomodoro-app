@@ -1,5 +1,7 @@
 package com.example.pomodoro.viewmodels
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Intent
 import android.os.CountDownTimer
 import android.util.Log
@@ -13,10 +15,8 @@ import java.lang.StringBuilder
 
 class TimerViewModel: ViewModel() {
     private val TAG: String = "로그"
-
     // timer를 service로 분리해야함.
     private lateinit var timer: CountDownTimer
-
     private var studyLength: Long
     private var breakLength: Long
     private val _remainTime: MutableLiveData<Long> = MutableLiveData()
@@ -33,9 +33,9 @@ class TimerViewModel: ViewModel() {
         get() = _timeString
     init {
         // 공부 시간 설정.
-        studyLength = 25*60*1000
+        studyLength = 10*1000
         // 쉬는 시간 설정.
-        breakLength = 5*60*1000
+        breakLength = 5*1000
         _remainTime.value = studyLength
         _isStudyTime.value = true
         _isTimerRunning.value = false
@@ -49,23 +49,12 @@ class TimerViewModel: ViewModel() {
         Log.d(TAG,"TimerViewModel - onCleared() called")
     }
 
-    // 남은 시간을 화면에서 설정하기 위해 만들 셋.
-    fun setRemainTime(timeString: String) {
-        val list = timeString.split(":")
-        _remainTime.value = 1000*(list.get(0).toLong() * 60 + list.get(1).toLong())
-        makeMilSecToMinSec(_remainTime.value!!)
-    }
-
     // 카운트 다운 타이머 객체 만들기.
     fun makeTimer() {
         timer = object: CountDownTimer(_remainTime.value!!, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 Log.d(TAG,"TimerViewModel - onTick() called remainTime : ${remainTime.value}")
-
-                _remainTime.apply {
-                    _remainTime.value = _remainTime.value!! - 1000
-//                    makeMilSecToMinSec(time = this.value!!)
-                }
+                _remainTime.value = _remainTime.value!! - 1000
             }
 
             override fun onFinish() {
@@ -75,16 +64,9 @@ class TimerViewModel: ViewModel() {
                 // 공부시간이면 휴식 시간이 되고, 휴식 시간이면 공부시간이됨.
                 _isStudyTime.value = !_isStudyTime.value!!
 
-                // 공부시간이 finish하므로 남은 시간이 휴식 시간이 됨.
-                if (isStudyTime.value!!) {
-                    _remainTime.value = studyLength
-                } else {
-                    _remainTime.value = breakLength
-                }
+                // 시간을 돌림.
+                reverseTimer()
 
-                _remainTime.apply {
-//                    makeMilSecToMinSec(this.value!!)
-                }
                 // 타이머가 종료됐으므로 false(타이머가 돌아가고 있지 않음)로 만듬.
                 _isTimerRunning.value = false
             }
@@ -98,17 +80,8 @@ class TimerViewModel: ViewModel() {
     }
     // 타이머 정지 (아예 시간 초기화)
     fun stopTimer() {
-        timer.also { timer ->
-            timer.cancel()
-
-            if (isStudyTime.value!!) {
-                _remainTime.value = studyLength
-            } else {
-                _remainTime.value = breakLength
-            }
-        }
-
-        makeMilSecToMinSec(_remainTime.value!!)
+        timer?.cancel()
+        reverseTimer()
         _isTimerRunning.value = false
     }
 
@@ -117,6 +90,16 @@ class TimerViewModel: ViewModel() {
         timer.cancel()
         _isTimerRunning.value = false
     }
+
+    // 시간 바꾸기
+    fun reverseTimer() {
+        if (isStudyTime.value == true) {        // 현재 공부시간이었으므로 휴식 시간으로 만들어줌.
+            _remainTime.value = studyLength
+        } else {                                // 현재 쉬는 시간이므로 공부 시간으로 만들어줌.
+            _remainTime.value = breakLength
+        }
+    }
+
 
     //시간을 디스프레이에 보여줄 형식을 만들어주는 메소드.
     //mm:ss 형식임.
@@ -134,5 +117,12 @@ class TimerViewModel: ViewModel() {
         timeFormated.append(sec)
 
         _timeString.value = timeFormated.toString()
+    }
+
+    fun toggleTime() {
+        timer.cancel()
+        _isStudyTime.value = !_isStudyTime.value!!
+        reverseTimer()
+        _isTimerRunning.value = false
     }
 }

@@ -66,12 +66,20 @@ class MainActivity : AppCompatActivity() {
 
         // 공부 중인지 관찰자 설정
         viewModel.isStudyTime.observe(this, Observer { isStudyTime ->
-            Log.d(TAG,"is studyTime is changed.")
-            if (isStudyTime) binding.pomodoroStatus.text = "공부중"
-            else binding.pomodoroStatus.text = "휴식중"
+            Log.d(TAG,"isStudyTime changed to ${viewModel.isStudyTime.value}")
+            if (isStudyTime) {
+                binding.pomodoroStatus.text = "공부중"
+                binding.studyBreakSwitch.isChecked = false
+            }
+            else {
+                binding.pomodoroStatus.text = "휴식중"
+                binding.studyBreakSwitch.isChecked = true
+            }
+            Log.d(TAG,"MainActivity - isSelected : ${binding.studyBreakSwitch.isChecked}")
         })
         // 타이머가 돌아가고 있는지 관찰자 설정
         viewModel.isTimerRunning.observe(this, Observer { isTimerRunning ->
+            Log.d(TAG,"MainActivity - isTimerRunning observed : ${isTimerRunning}")
             // 타이머가 실행중o이면  타이머 시작버튼 안보이고 일시정지 버튼 보임.
             // 타이머가 실행중x이면  타이머 일시정지 보이고   시작버튼 보임.
             if (isTimerRunning) {
@@ -124,7 +132,11 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG,"MainActivity - timeView is clicked")
 //            binding.editTime.visibility = View.VISIBLE
         }
-
+        // 스위치 누르면 휴식 시간 -> 공부시간 공부시간 -> 휴식시간
+        binding.studyBreakSwitch.setOnClickListener { view ->
+            alarmManager?.cancel(mPendingIntent)
+            viewModel.toggleTime()
+        }
     }
     override fun onStart() {
         super.onStart()
@@ -154,37 +166,12 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG,"MainActivity - onDestroy() called")
-        viewModel.stopTimer()
-        alarmManager.cancel(mPendingIntent)
     }
+
     private fun startTimer() {
         Log.d(TAG,"MainActivity - startTimer() called")
-        viewModel.makeTimer()
+        setAlarmManager()
         viewModel.startTimer()
-
-        if (viewModel.isTimerRunning.value == true) {
-            if (Build.VERSION.SDK_INT < 23) {
-                if (Build.VERSION.SDK_INT >= 19) {
-                    alarmManager.setExact(
-                        AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                        SystemClock.elapsedRealtime() + viewModel.remainTime.value!!,
-                        mPendingIntent
-                    )
-                } else {
-                    alarmManager.set(
-                        AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                        SystemClock.elapsedRealtime() + viewModel.remainTime.value!!,
-                        mPendingIntent
-                    )
-                }
-            } else {
-                alarmManager.setAndAllowWhileIdle(
-                    AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    SystemClock.elapsedRealtime() + viewModel.remainTime.value!!,
-                    mPendingIntent
-                )
-            }
-        }
     }
 
     private fun stopTimer() {
@@ -198,5 +185,29 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG,"MainActivity - pauseTimer() called")
         alarmManager.cancel(mPendingIntent)
         viewModel.pauseTimer()
+    }
+
+    private fun setAlarmManager() {
+        if (Build.VERSION.SDK_INT < 23) {
+            if (Build.VERSION.SDK_INT >= 19) {
+                alarmManager.setExact(
+                    AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    SystemClock.elapsedRealtime() + viewModel.remainTime.value!!,
+                    mPendingIntent
+                )
+            } else {
+                alarmManager.set(
+                    AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    SystemClock.elapsedRealtime() + viewModel.remainTime.value!!,
+                    mPendingIntent
+                )
+            }
+        } else {
+            alarmManager.setAndAllowWhileIdle(
+                AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime() + viewModel.remainTime.value!!,
+                mPendingIntent
+            )
+        }
     }
 }
