@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
             mAlarmIntet,
             PendingIntent.FLAG_UPDATE_CURRENT
         )
-
+        applicationContext
         alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         // 공부 중인지 관찰자 설정
@@ -166,6 +166,8 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG,"MainActivity - onDestroy() called")
+        alarmManager?.cancel(mPendingIntent)
+        stopTimer()
     }
 
     private fun startTimer() {
@@ -203,7 +205,7 @@ class MainActivity : AppCompatActivity() {
                 )
             }
         } else {
-            alarmManager.setAndAllowWhileIdle(
+            alarmManager.setExactAndAllowWhileIdle(
                 AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 SystemClock.elapsedRealtime() + viewModel.remainTime.value!!,
                 mPendingIntent
