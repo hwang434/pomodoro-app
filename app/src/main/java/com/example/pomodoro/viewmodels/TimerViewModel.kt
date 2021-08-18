@@ -33,9 +33,9 @@ class TimerViewModel: ViewModel() {
         get() = _timeString
     init {
         // 공부 시간 설정.
-        studyLength = 10*1000
+        studyLength = 25*60*1000
         // 쉬는 시간 설정.
-        breakLength = 5*1000
+        breakLength = 5*60*1000
         _remainTime.value = studyLength
         _isStudyTime.value = true
         _isTimerRunning.value = false
@@ -99,8 +99,6 @@ class TimerViewModel: ViewModel() {
             _remainTime.value = breakLength
         }
     }
-
-
     //시간을 디스프레이에 보여줄 형식을 만들어주는 메소드.
     //mm:ss 형식임.
     fun makeMilSecToMinSec(time: Long) {
