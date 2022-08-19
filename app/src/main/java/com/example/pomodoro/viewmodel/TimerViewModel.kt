@@ -11,8 +11,8 @@ class TimerViewModel: ViewModel() {
     private val TAG: String = "로그"
     // timer를 service로 분리해야함.
     private lateinit var timer: CountDownTimer
-    private var studyLength: Long
-    private var breakLength: Long
+    private var studyLength: Long = 25*60*1000
+    private var breakLength: Long = 5*60*1000
     private val _remainTime: MutableLiveData<Long> = MutableLiveData()
     val remainTime: LiveData<Long>
         get() = _remainTime
@@ -22,19 +22,11 @@ class TimerViewModel: ViewModel() {
     private val _isTimerRunning: MutableLiveData<Boolean> = MutableLiveData()
     val isTimerRunning: LiveData<Boolean>
         get() = _isTimerRunning
-    private val _timeString: MutableLiveData<String> = MutableLiveData()
-    val timeString: LiveData<String>
-        get() = _timeString
 
     init {
-        // 공부 시간 설정.
-        studyLength = 25*60*1000
-        // 쉬는 시간 설정.
-        breakLength = 5*60*1000
         _remainTime.value = studyLength
         _isStudyTime.value = true
         _isTimerRunning.value = false
-        makeMilSecToMinSec(remainTime.value!!)
         makeTimer()
     }
 
@@ -45,11 +37,11 @@ class TimerViewModel: ViewModel() {
     }
 
     // 카운트 다운 타이머 객체 만들기.
-    fun makeTimer() {
+    private fun makeTimer() {
         timer = object: CountDownTimer(_remainTime.value!!, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 Log.d(TAG,"TimerViewModel - onTick() called remainTime : ${remainTime.value}")
-                _remainTime.value = _remainTime.value!! - 1000
+                _remainTime.value?.let { _remainTime.postValue(it - 1000) }
             }
 
             override fun onFinish() {
@@ -67,15 +59,17 @@ class TimerViewModel: ViewModel() {
             }
         }
     }
+
     // 타이머 시간 실행하기.
     fun startTimer() {
         makeTimer()
         timer.start()
         _isTimerRunning.value = true
     }
+
     // 타이머 정지 (아예 시간 초기화)
     fun stopTimer() {
-        timer?.cancel()
+        timer.cancel()
         reverseTimer()
         _isTimerRunning.value = false
     }
@@ -93,23 +87,6 @@ class TimerViewModel: ViewModel() {
         } else {                                // 현재 쉬는 시간이므로 공부 시간으로 만들어줌.
             _remainTime.value = breakLength
         }
-    }
-    //시간을 디스프레이에 보여줄 형식을 만들어주는 메소드.
-    //mm:ss 형식임.
-    fun makeMilSecToMinSec(time: Long) {
-        val timeFormated = StringBuilder()
-        var min = time/1000/60
-        var sec = (time % (1000*60)) / 1000
-
-        //0~9분이면 0 앞에 붙여서 0m:ss 처리.
-        if (min < 10) timeFormated.append(0)
-        timeFormated.append(min)
-        timeFormated.append(":")
-        //0~9초면 0 앞에 붙여서 mm:0s 처리.
-        if (sec < 10) timeFormated.append(0)
-        timeFormated.append(sec)
-
-        _timeString.value = timeFormated.toString()
     }
 
     fun toggleTime() {
