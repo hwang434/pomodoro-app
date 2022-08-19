@@ -28,12 +28,29 @@ class VibrationService: Service(){
         vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
         musicPlayer = MediaPlayer.create(this, R.raw.ppippi)
         musicPlayer.start()
+
+        // if : api is higher than 21
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            vibrator.vibrate(1500,
-                AudioAttributes.Builder().
-                setUsage(AudioAttributes.USAGE_ALARM).
-                setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).
-                build())
+            // if : api is higher than 26
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(
+                    VibrationEffect.createWaveform(longArrayOf(500, 1000, 500, 500), 10),
+                    AudioAttributes.Builder().
+                    setUsage(AudioAttributes.USAGE_ALARM).
+                    setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).
+                    build()
+                )
+            }
+            // else : api is in the between 21 and 26
+            else {
+                vibrator.vibrate(
+                    1500,
+                    AudioAttributes.Builder().
+                    setUsage(AudioAttributes.USAGE_ALARM).
+                    setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).
+                    build()
+                )
+            }
         }
 
         return super.onStartCommand(intent, flags, startId)

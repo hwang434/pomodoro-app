@@ -1,16 +1,10 @@
-package com.example.pomodoro.viewmodels
+package com.example.pomodoro.viewmodel
 
-import android.app.AlarmManager
-import android.app.PendingIntent
-import android.content.Intent
 import android.os.CountDownTimer
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.pomodoro.service.VibrationService
-import com.example.pomodoro.views.MainActivity
 import java.lang.StringBuilder
 
 class TimerViewModel: ViewModel() {
@@ -31,6 +25,7 @@ class TimerViewModel: ViewModel() {
     private val _timeString: MutableLiveData<String> = MutableLiveData()
     val timeString: LiveData<String>
         get() = _timeString
+
     init {
         // 공부 시간 설정.
         studyLength = 25*60*1000
