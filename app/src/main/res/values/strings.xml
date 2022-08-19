@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">pomodoro</string>
     <string name="timer_start_btn">시작</string>
+    <string name="nothing_to_do">아무것도 안함</string>
+    <string name="pause">일시정지</string>
+    <string name="stop">정지</string>
+    <string name="break_time">휴식 시간</string>
+    <string name="study_time">공부 시간</string>
 </resources>
