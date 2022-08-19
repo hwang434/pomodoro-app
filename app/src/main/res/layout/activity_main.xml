@@ -43,11 +43,11 @@
             style="@style/button_style"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="136dp"
+            android:layout_marginTop="48dp"
             android:text="@string/timer_start_btn"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/timeView"
+            app:layout_constraintTop_toBottomOf="@id/pomodoroStatus"
             android:background="@drawable/rounded_button" />
         <Button
             android:id="@+id/pauseBtn"

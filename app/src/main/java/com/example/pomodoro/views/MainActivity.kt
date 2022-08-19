@@ -19,12 +19,14 @@ import com.example.pomodoro.databinding.ActivityMainBinding
 import com.example.pomodoro.receiver.AlarmReceiver
 import com.example.pomodoro.viewmodel.TimerViewModel
 import java.lang.StringBuilder
+import kotlin.concurrent.timer
 
 class MainActivity : AppCompatActivity() {
     companion object {
         private const val TAG: String = "로그"
         // 리시버 보낼 인텐트 주소.
         private const val BROAD_CAST = "com.example.pomodoro.ALARM_START"
+        private var lastTime = 0L
     }
 
     private lateinit var binding: ActivityMainBinding
@@ -48,12 +50,25 @@ class MainActivity : AppCompatActivity() {
         registerAlarmReceiver()
         initAlarmManager()
         initAlarmPendingIntent()
-        setObserver()
     }
 
     override fun onStart() {
         super.onStart()
         Log.d(TAG,"MainActivity - onStart() called")
+        setObserver()
+        refreshUIForOnStop()
+    }
+
+    private fun refreshUIForOnStop() {
+        Log.d(TAG,"MainActivity - refreshUIForOnStop() called")
+//        if (timerViewModel.isTimerRunning.value == true) {
+//            // 화면이 꺼진 시간.
+//            Log.d(TAG,"MainActivity - lastTime : $lastTime called")
+//            val currentTime = System.currentTimeMillis() / 1000000
+//            Log.d(TAG,"MainActivity - currentTime : $currentTime")
+//
+//            timerViewModel.setTime(timerViewModel.remainTime.value!! - (currentTime - lastTime))
+//        }
     }
 
     override fun onPause() {
@@ -64,6 +79,8 @@ class MainActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         Log.d(TAG,"MainActivity - onStop() called")
+        lastTime = System.currentTimeMillis() / 1000000
+        timerViewModel.remainTime.removeObservers(this)
     }
 
     override fun onRestart() {
@@ -222,8 +239,7 @@ class MainActivity : AppCompatActivity() {
         timerViewModel.remainTime
     }
 
-    //시간을 디스프레이에 보여줄 형식을 만들어주는 메소드.
-    //mm:ss 형식임.
+    // long to time String.
     private fun makeMilSecToMinSec(time: Long): String {
         val timeFormat = StringBuilder()
         var min = time/1000/60

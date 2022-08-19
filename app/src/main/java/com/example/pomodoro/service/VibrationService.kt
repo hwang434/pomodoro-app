@@ -34,7 +34,7 @@ class VibrationService: Service(){
             // if : api is higher than 26
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 vibrator.vibrate(
-                    VibrationEffect.createWaveform(longArrayOf(500, 1000, 500, 500), 10),
+                    VibrationEffect.createWaveform(longArrayOf(0, 100, 500, 100, 500, 100, 500, 100, 500, 100, 500), 1),
                     AudioAttributes.Builder().
                     setUsage(AudioAttributes.USAGE_ALARM).
                     setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).
