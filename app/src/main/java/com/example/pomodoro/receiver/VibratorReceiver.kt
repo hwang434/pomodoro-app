@@ -14,7 +14,7 @@ import com.example.pomodoro.R
 import com.example.pomodoro.service.VibrationService
 
 
-class AlarmReceiver: BroadcastReceiver()  {
+class VibratorReceiver: BroadcastReceiver()  {
     private val TAG: String = "로그"
 
     override fun onReceive(context: Context?, intent: Intent?) {

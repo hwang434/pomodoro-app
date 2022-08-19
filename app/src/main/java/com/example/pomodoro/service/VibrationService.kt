@@ -10,6 +10,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.Log
 import android.widget.Toast
+import androidx.core.content.getSystemService
 import com.example.pomodoro.R
 
 class VibrationService: Service(){
@@ -17,16 +18,18 @@ class VibrationService: Service(){
     private lateinit var vibrator: Vibrator
     private lateinit var musicPlayer: MediaPlayer
 
+    override fun onCreate() {
+        super.onCreate()
+        vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
+        musicPlayer = MediaPlayer.create(this, R.raw.ppippi)
+    }
+
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d(TAG,"AlarmService - onStartCommand() called")
-        Toast.makeText(this, "시간이 다했어요~", Toast.LENGTH_LONG).show()
-
-        vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
-        musicPlayer = MediaPlayer.create(this, R.raw.ppippi)
         musicPlayer.start()
 
         // if : api is higher than 21

@@ -12,14 +12,12 @@ import android.os.SystemClock
 import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.view.*
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModelProvider
 import com.example.pomodoro.R
 import com.example.pomodoro.databinding.ActivityMainBinding
-import com.example.pomodoro.receiver.AlarmReceiver
+import com.example.pomodoro.receiver.VibratorReceiver
 import com.example.pomodoro.viewmodel.TimerViewModel
 import java.lang.StringBuilder
-import kotlin.concurrent.timer
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -180,9 +178,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun registerAlarmReceiver() {
         Log.d(TAG,"MainActivity - registerAlarmReceiver() called")
-        val alarmReceiver = AlarmReceiver()
+        val vibratorReceiver = VibratorReceiver()
         val intentFilter = IntentFilter(BROAD_CAST)
-        registerReceiver(alarmReceiver, intentFilter)
+        registerReceiver(vibratorReceiver, intentFilter)
     }
 
     private fun initAlarmManager() {
@@ -242,8 +240,8 @@ class MainActivity : AppCompatActivity() {
     // long to time String.
     private fun makeMilSecToMinSec(time: Long): String {
         val timeFormat = StringBuilder()
-        var min = time/1000/60
-        var sec = (time % (1000*60)) / 1000
+        val min = time/1000/60
+        val sec = (time % (1000*60)) / 1000
 
         //0~9분이면 0 앞에 붙여서 0m:ss 처리.
         if (min < 10) timeFormat.append(0)
