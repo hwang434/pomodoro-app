@@ -54,6 +54,7 @@ class MainActivity : AppCompatActivity() {
         initAlarmManager()
         initAlarmPendingIntent()
         registerTimeReceiver()
+        initTimerServiceIntent()
     }
 
     override fun onStart() {
@@ -106,11 +107,13 @@ class MainActivity : AppCompatActivity() {
     // 공부 시간으로 설정
     private fun setToStudyTime() {
         Log.d(TAG,"MainActivity - setToStudyTime() called")
+        timerViewModel.toggleTime()
     }
 
     // 쉬는 시간으로 설정
     private fun setToRestTime() {
         Log.d(TAG,"MainActivity - setToRestTime() called")
+        timerViewModel.toggleTime()
     }
 
     // 시간 설정
@@ -128,7 +131,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startTimerService() {
-        timerServiceIntent = Intent(this, TimerService()::class.java)
         timerServiceIntent.putExtra("time", timerViewModel.remainTime.value!!)
         startForegroundService(timerServiceIntent)
     }
@@ -149,7 +151,11 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG,"MainActivity - pauseTimer() called")
         binding.startBtn.visibility = View.VISIBLE
         binding.pauseBtn.visibility = View.INVISIBLE
+
         alarmManager.cancel(vibratorPendingIntent)
+        stopService(vibratorReceiverIntent)
+        stopService(timerServiceIntent)
+
         timerViewModel.pauseTimer()
     }
 
@@ -200,6 +206,10 @@ class MainActivity : AppCompatActivity() {
             vibratorReceiverIntent,
             PendingIntent.FLAG_IMMUTABLE
         )
+    }
+
+    private fun initTimerServiceIntent() {
+        timerServiceIntent = Intent(this, TimerService()::class.java)
     }
 
     // LiveData를 기준으로 UI 변경
