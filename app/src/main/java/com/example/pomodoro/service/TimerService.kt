@@ -10,7 +10,7 @@ import com.example.pomodoro.R
 import com.example.pomodoro.util.LongToTime
 import com.example.pomodoro.views.MainActivity
 
-class AlarmService : Service() {
+class TimerService : Service() {
     companion object {
         private const val TAG: String = "로그"
         private const val TIME_CAST = "com.example.pomodoro.TICK"
@@ -34,15 +34,18 @@ class AlarmService : Service() {
         return super.onStartCommand(intent, flags, startId)
     }
 
-    override fun onDestroy() {
-        Log.d(TAG,"AlarmService - onDestroy() called")
-        super.onDestroy()
-        countDownTimer.cancel()
-    }
-
     override fun onBind(intent: Intent?): IBinder? {
         Log.d(TAG,"AlarmService - onBind() called")
         return null
+    }
+
+    override fun onDestroy() {
+        Log.d(TAG,"AlarmService - onDestroy() called")
+        super.onDestroy()
+        // Cancel Timer.
+        countDownTimer.cancel()
+        // Remove notification.
+        notificationManager.cancel(NOTIFICATION_ID)
     }
 
     private fun createNotificationBuilder() {
@@ -77,8 +80,6 @@ class AlarmService : Service() {
             .build()
     }
 
-
-
     private fun startCountDown(intent: Intent?) {
         Log.d(TAG,"AlarmService - startCountDown() called")
         Log.d(TAG,"AlarmService - intent.getLongExtra : ${intent?.getLongExtra("time", 10000)}")
@@ -92,7 +93,6 @@ class AlarmService : Service() {
                 time -= 1000
                 broadcastIntent.putExtra("time", time)
                 sendBroadcast(broadcastIntent)
-
                 notificationManager.notify(NOTIFICATION_ID, notificationBuilder.setContentText(LongToTime.makeMilSecToMinSec(time)).build())
             }
 

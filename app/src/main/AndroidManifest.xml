@@ -37,7 +37,7 @@
             android:name=".service.VibrationService"
             android:enabled="true" />
         <service
-            android:name=".service.AlarmService"
+            android:name=".service.TimerService"
             android:enabled="true"/>
     </application>
 </manifest>
