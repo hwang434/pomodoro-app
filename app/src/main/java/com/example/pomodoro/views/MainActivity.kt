@@ -127,8 +127,6 @@ class MainActivity : AppCompatActivity() {
         startTimerService()
     }
 
-
-
     private fun startTimerService() {
         timerServiceIntent = Intent(this, TimerService()::class.java)
         timerServiceIntent.putExtra("time", timerViewModel.remainTime.value!!)
@@ -238,9 +236,6 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG,"MainActivity - time : $time")
             binding.timeView.text = LongToTime.makeMilSecToMinSec(time)
         }
-
-        // 1초마다
-        timerViewModel.remainTime
     }
 
     private fun setEvent() {
@@ -283,8 +278,13 @@ class MainActivity : AppCompatActivity() {
         tickBroadCastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 Log.d(TAG,"MainActivity - tick receive broad cast() called")
-                intent?.getLongExtra("time", 100000)?.let { it ->
-                    timerViewModel.setTime(it)
+                intent?.getLongExtra("time", 100000)?.let { time ->
+                    if (time == 0L) {
+                        timerViewModel.toggleTime()
+                        return@let
+                    }
+
+                    timerViewModel.setTime(time)
                 }
             }
         }

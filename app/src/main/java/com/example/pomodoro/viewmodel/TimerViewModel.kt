@@ -46,7 +46,8 @@ class TimerViewModel: ViewModel() {
     }
 
     // 시간 바꾸기
-    fun reverseTimer() {
+    private fun reverseTimer() {
+        Log.d(TAG,"TimerViewModel - reverseTimer() called")
         if (isStudyTime.value == true) {        // 현재 공부시간이었으므로 휴식 시간으로 만들어줌.
             _remainTime.value = studyLength
         } else {                                // 현재 쉬는 시간이므로 공부 시간으로 만들어줌.
@@ -55,6 +56,7 @@ class TimerViewModel: ViewModel() {
     }
 
     fun toggleTime() {
+        Log.d(TAG,"TimerViewModel - toggleTime() called")
         _isStudyTime.value = !_isStudyTime.value!!
         reverseTimer()
         _isTimerRunning.value = false
