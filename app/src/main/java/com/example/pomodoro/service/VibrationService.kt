@@ -70,10 +70,10 @@ class VibrationService: Service(){
     private fun startMusicMedia() {
         vibrator.vibrate(
             VibrationEffect.createWaveform(longArrayOf(0, 100, 500, 100, 500, 100, 500, 100, 500, 100, 500), -1),
-            AudioAttributes.Builder().
-            setUsage(AudioAttributes.USAGE_ALARM).
-            setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).
-            build()
+            AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ALARM)
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                .build()
         )
     }
 }

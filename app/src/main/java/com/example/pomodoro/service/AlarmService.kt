@@ -34,6 +34,11 @@ class AlarmService : Service() {
         return super.onStartCommand(intent, flags, startId)
     }
 
+    override fun onBind(intent: Intent?): IBinder? {
+        Log.d(TAG,"AlarmService - onBind() called")
+        return null
+    }
+
     override fun onDestroy() {
         Log.d(TAG,"AlarmService - onDestroy() called")
         super.onDestroy()
