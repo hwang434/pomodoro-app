@@ -10,8 +10,8 @@ import java.lang.StringBuilder
 class TimerViewModel: ViewModel() {
     private val TAG: String = "로그"
     // timer를 service로 분리해야함.
-    private var studyLength: Long = 10 * 1000
-    private var breakLength: Long = 7 * 1000
+    private var studyLength: Long = 25 * 60 * 1000
+    private var breakLength: Long = 5 * 60 * 1000
     private val _remainTime: MutableLiveData<Long> = MutableLiveData()
     val remainTime: LiveData<Long>
         get() = _remainTime
