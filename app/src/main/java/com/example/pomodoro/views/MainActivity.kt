@@ -54,18 +54,6 @@ class MainActivity : AppCompatActivity() {
         registerTimeReceiver()
     }
 
-    private fun registerTimeReceiver() {
-        tickBroadCastReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                Log.d(TAG,"MainActivity - tick receive broad cast() called")
-                intent?.getLongExtra("time", 100000)?.let { it ->
-                    timerViewModel.setTime(it)
-                }
-            }
-        }
-        registerReceiver(tickBroadCastReceiver, IntentFilter(TIME_CAST))
-    }
-
     override fun onStart() {
         super.onStart()
         Log.d(TAG,"MainActivity - onStart() called")
@@ -277,5 +265,17 @@ class MainActivity : AppCompatActivity() {
                 setToStudyTime()
             }
         }
+    }
+
+    private fun registerTimeReceiver() {
+        tickBroadCastReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                Log.d(TAG,"MainActivity - tick receive broad cast() called")
+                intent?.getLongExtra("time", 100000)?.let { it ->
+                    timerViewModel.setTime(it)
+                }
+            }
+        }
+        registerReceiver(tickBroadCastReceiver, IntentFilter(TIME_CAST))
     }
 }
