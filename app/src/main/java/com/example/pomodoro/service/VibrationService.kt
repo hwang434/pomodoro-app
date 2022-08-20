@@ -1,16 +1,12 @@
 package com.example.pomodoro.service
 
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.media.AudioAttributes
 import android.media.MediaPlayer
-import android.os.Build
-import android.os.IBinder
-import android.os.VibrationEffect
-import android.os.Vibrator
+import android.os.*
 import android.util.Log
-import android.widget.Toast
-import androidx.core.content.getSystemService
 import com.example.pomodoro.R
 
 class VibrationService: Service(){
@@ -19,42 +15,35 @@ class VibrationService: Service(){
     private lateinit var musicPlayer: MediaPlayer
 
     override fun onCreate() {
+        Log.d(TAG,"VibrationService - onCreate() called")
         super.onCreate()
-        vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibrateManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            vibrator = vibrateManager.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }
+
         musicPlayer = MediaPlayer.create(this, R.raw.ppippi)
     }
 
     override fun onBind(intent: Intent?): IBinder? {
+        Log.d(TAG,"VibrationService - onBind() called")
         return null
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.d(TAG,"AlarmService - onStartCommand() called")
+        Log.d(TAG,"VibrationService - onStartCommand() called")
         musicPlayer.start()
 
-        // if : api is higher than 21
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            // if : api is higher than 26
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator.vibrate(
-                    VibrationEffect.createWaveform(longArrayOf(0, 100, 500, 100, 500, 100, 500, 100, 500, 100, 500), 1),
-                    AudioAttributes.Builder().
-                    setUsage(AudioAttributes.USAGE_ALARM).
-                    setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).
-                    build()
-                )
-            }
-            // else : api is in the between 21 and 26
-            else {
-                vibrator.vibrate(
-                    1500,
-                    AudioAttributes.Builder().
-                    setUsage(AudioAttributes.USAGE_ALARM).
-                    setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).
-                    build()
-                )
-            }
-        }
+        vibrator.vibrate(
+            VibrationEffect.createWaveform(longArrayOf(0, 100, 500, 100, 500, 100, 500, 100, 500, 100, 500), -1),
+            AudioAttributes.Builder().
+            setUsage(AudioAttributes.USAGE_ALARM).
+            setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).
+            build()
+        )
 
         return super.onStartCommand(intent, flags, startId)
     }

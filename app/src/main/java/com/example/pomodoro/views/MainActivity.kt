@@ -2,10 +2,10 @@ package com.example.pomodoro.views
 
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Build
 import androidx.databinding.DataBindingUtil
 import android.os.Bundle
 import android.os.SystemClock
@@ -16,14 +16,15 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.pomodoro.R
 import com.example.pomodoro.databinding.ActivityMainBinding
 import com.example.pomodoro.receiver.VibratorReceiver
+import com.example.pomodoro.service.AlarmService
+import com.example.pomodoro.util.LongToTime
 import com.example.pomodoro.viewmodel.TimerViewModel
-import java.lang.StringBuilder
 
 class MainActivity : AppCompatActivity() {
     companion object {
         private const val TAG: String = "로그"
-        // 리시버 보낼 인텐트 주소.
-        private const val BROAD_CAST = "com.example.pomodoro.ALARM_START"
+        // 1초마다 타이머의 시간을 받을 주소
+        private const val TIME_CAST = "com.example.pomodoro.TICK"
         private var lastTime = 0L
     }
 
@@ -33,6 +34,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var alarmManager: AlarmManager
     // PendingIntent
     private lateinit var mPendingIntent: PendingIntent
+    // Tick BroadCast
+    private lateinit var tickBroadCastReceiver: BroadcastReceiver
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG, "MainActivity - onCreate() called")
@@ -45,9 +48,22 @@ class MainActivity : AppCompatActivity() {
         // 뷰모델 초기화
         initViewModel()
         // 동적으로 리시버 등록하기.
-        registerAlarmReceiver()
+        registerVibratorReceiver()
         initAlarmManager()
         initAlarmPendingIntent()
+        registerTimeReceiver()
+    }
+
+    private fun registerTimeReceiver() {
+        tickBroadCastReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                Log.d(TAG,"MainActivity - tick receive broad cast() called")
+                intent?.getLongExtra("time", 100000)?.let { it ->
+                    timerViewModel.setTime(it)
+                }
+            }
+        }
+        registerReceiver(tickBroadCastReceiver, IntentFilter(TIME_CAST))
     }
 
     override fun onStart() {
@@ -59,14 +75,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun refreshUIForOnStop() {
         Log.d(TAG,"MainActivity - refreshUIForOnStop() called")
-//        if (timerViewModel.isTimerRunning.value == true) {
-//            // 화면이 꺼진 시간.
-//            Log.d(TAG,"MainActivity - lastTime : $lastTime called")
-//            val currentTime = System.currentTimeMillis() / 1000000
-//            Log.d(TAG,"MainActivity - currentTime : $currentTime")
-//
-//            timerViewModel.setTime(timerViewModel.remainTime.value!! - (currentTime - lastTime))
-//        }
+        if (timerViewModel.isTimerRunning.value == true) {
+            // 화면이 꺼진 시간.
+            Log.d(TAG,"MainActivity - lastTime : $lastTime called")
+            val currentTime = System.currentTimeMillis() / 1000000
+            Log.d(TAG,"MainActivity - currentTime : $currentTime")
+
+            timerViewModel.setTime(timerViewModel.remainTime.value!! - (currentTime - lastTime))
+        }
     }
 
     override fun onPause() {
@@ -117,7 +133,11 @@ class MainActivity : AppCompatActivity() {
         binding.startBtn.visibility = View.INVISIBLE
         binding.pauseBtn.visibility = View.VISIBLE
         setAlarmManager()
-        timerViewModel.startTimer()
+
+        val intent = Intent(this, AlarmService()::class.java)
+        intent.putExtra("time", timerViewModel.remainTime.value!!)
+
+        startForegroundService(intent)
     }
 
     private fun stopTimer() {
@@ -138,27 +158,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun setAlarmManager() {
         Log.d(TAG,"MainActivity - setAlarmManager() called")
-        if (Build.VERSION.SDK_INT < 23) {
-            if (Build.VERSION.SDK_INT >= 19) {
-                alarmManager.setExact(
-                    AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    SystemClock.elapsedRealtime() + timerViewModel.remainTime.value!!,
-                    mPendingIntent
-                )
-            } else {
-                alarmManager.set(
-                    AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    SystemClock.elapsedRealtime() + timerViewModel.remainTime.value!!,
-                    mPendingIntent
-                )
-            }
-        } else {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime() + timerViewModel.remainTime.value!!,
-                mPendingIntent
-            )
-        }
+
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.ELAPSED_REALTIME_WAKEUP,
+            SystemClock.elapsedRealtime() + timerViewModel.remainTime.value!!,
+            mPendingIntent
+        )
     }
 
     private fun turnOnDisplayPermanently() {
@@ -176,10 +181,10 @@ class MainActivity : AppCompatActivity() {
         binding.lifecycleOwner = this
     }
 
-    private fun registerAlarmReceiver() {
+    private fun registerVibratorReceiver() {
         Log.d(TAG,"MainActivity - registerAlarmReceiver() called")
         val vibratorReceiver = VibratorReceiver()
-        val intentFilter = IntentFilter(BROAD_CAST)
+        val intentFilter = IntentFilter(VibratorReceiver.VIBRATOR_CAST)
         registerReceiver(vibratorReceiver, intentFilter)
     }
 
@@ -190,11 +195,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun initAlarmPendingIntent() {
         Log.d(TAG,"MainActivity - initAlarmPendingIntent() called")
-        val alarmIntent = Intent(BROAD_CAST)
+        val alarmIntent = Intent(VibratorReceiver.VIBRATOR_CAST)
         mPendingIntent = PendingIntent.getBroadcast(this,
             0,
             alarmIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
+            PendingIntent.FLAG_IMMUTABLE
         )
     }
 
@@ -230,28 +235,11 @@ class MainActivity : AppCompatActivity() {
         
         timerViewModel.remainTime.observe(this) { time ->
             Log.d(TAG,"MainActivity - time : $time")
-            binding.timeView.text = makeMilSecToMinSec(time)
+            binding.timeView.text = LongToTime.makeMilSecToMinSec(time)
         }
 
         // 1초마다
         timerViewModel.remainTime
-    }
-
-    // long to time String.
-    private fun makeMilSecToMinSec(time: Long): String {
-        val timeFormat = StringBuilder()
-        val min = time/1000/60
-        val sec = (time % (1000*60)) / 1000
-
-        //0~9분이면 0 앞에 붙여서 0m:ss 처리.
-        if (min < 10) timeFormat.append(0)
-        timeFormat.append(min)
-        timeFormat.append(":")
-        //0~9초면 0 앞에 붙여서 mm:0s 처리.
-        if (sec < 10) timeFormat.append(0)
-        timeFormat.append(sec)
-
-        return timeFormat.toString()
     }
 
     private fun setEvent() {
@@ -276,7 +264,7 @@ class MainActivity : AppCompatActivity() {
             setTime()
         }
 
-        binding.studyBreakSwitch.setOnClickListener { view ->
+        binding.studyBreakSwitch.setOnClickListener {
             // 타이머를 멈추고
             stopTimer()
             // if : 공부시간이면 -> 휴식 시간으로 설정

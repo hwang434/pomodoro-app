@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.pomodoro">
-    <uses-permission android:name="android.permission.VIBRATE"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
 
     <application
         android:allowBackup="true"
@@ -11,27 +13,31 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.Pomodoro">
-        <!--Activities-->
-        <activity android:name=".views.MainActivity"
+        <activity
+            android:name=".views.MainActivity"
             android:exported="true"
             android:screenOrientation="fullSensor">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!--Receivers-->
-        <receiver android:name=".receiver.VibratorReceiver"
-            android:exported="true"
-            android:enabled="true">
+        <!-- Receivers -->
+        <receiver
+            android:name=".receiver.VibratorReceiver"
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
-                <action android:name="com.example.pomodoro.ALARM_START"/>
+                <action android:name="com.example.pomodoro.ALARM_START" />
             </intent-filter>
         </receiver>
-
-        <!--Services-->
-        <service android:name=".service.VibrationService"
-            android:enabled="true">
-        </service>
+        <!-- Services -->
+        <service
+            android:name=".service.VibrationService"
+            android:enabled="true" />
+        <service
+            android:name=".service.AlarmService"
+            android:enabled="true"/>
     </application>
 </manifest>
