@@ -127,8 +127,6 @@ class MainActivity : AppCompatActivity() {
         startTimerService()
     }
 
-
-
     private fun startTimerService() {
         timerServiceIntent = Intent(this, TimerService()::class.java)
         timerServiceIntent.putExtra("time", timerViewModel.remainTime.value!!)
@@ -238,9 +236,6 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG,"MainActivity - time : $time")
             binding.timeView.text = LongToTime.makeMilSecToMinSec(time)
         }
-
-        // 1초마다
-        timerViewModel.remainTime
     }
 
     private fun setEvent() {
@@ -279,12 +274,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // TimerService로부터 시간을 받아와서 뷰모델의 데이터를 업데이트 시켜줌
     private fun registerTimeReceiver() {
         tickBroadCastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 Log.d(TAG,"MainActivity - tick receive broad cast() called")
-                intent?.getLongExtra("time", 100000)?.let { it ->
-                    timerViewModel.setTime(it)
+                intent?.getLongExtra("time", 100000)?.let { time ->
+                    // if : 시간이 끝나면 시간 반전
+                    if (time == 0L) {
+                        // 공부 시간이면 휴식 시간으로, 휴식 시간이면 공부 시간으로 변경
+                        timerViewModel.toggleTime()
+                        return@let
+                    }
+
+                    timerViewModel.setTime(time)
                 }
             }
         }
