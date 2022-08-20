@@ -37,12 +37,10 @@ class AlarmService : Service() {
     override fun onDestroy() {
         Log.d(TAG,"AlarmService - onDestroy() called")
         super.onDestroy()
+        // Cancel Timer.
         countDownTimer.cancel()
-    }
-
-    override fun onBind(intent: Intent?): IBinder? {
-        Log.d(TAG,"AlarmService - onBind() called")
-        return null
+        // Remove notification.
+        notificationManager.cancel(NOTIFICATION_ID)
     }
 
     private fun createNotificationBuilder() {
@@ -77,8 +75,6 @@ class AlarmService : Service() {
             .build()
     }
 
-
-
     private fun startCountDown(intent: Intent?) {
         Log.d(TAG,"AlarmService - startCountDown() called")
         Log.d(TAG,"AlarmService - intent.getLongExtra : ${intent?.getLongExtra("time", 10000)}")
@@ -92,7 +88,6 @@ class AlarmService : Service() {
                 time -= 1000
                 broadcastIntent.putExtra("time", time)
                 sendBroadcast(broadcastIntent)
-
                 notificationManager.notify(NOTIFICATION_ID, notificationBuilder.setContentText(LongToTime.makeMilSecToMinSec(time)).build())
             }
 
