@@ -16,7 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.pomodoro.R
 import com.example.pomodoro.databinding.ActivityMainBinding
 import com.example.pomodoro.receiver.VibratorReceiver
-import com.example.pomodoro.service.AlarmService
+import com.example.pomodoro.service.TimerService
 import com.example.pomodoro.util.LongToTime
 import com.example.pomodoro.viewmodel.TimerViewModel
 
@@ -27,7 +27,6 @@ class MainActivity : AppCompatActivity() {
         private const val TIME_CAST = "com.example.pomodoro.TICK"
         private var lastTime = 0L
     }
-
     private lateinit var binding: ActivityMainBinding
     private lateinit var timerViewModel: TimerViewModel
     // 알람 매니저
@@ -47,8 +46,9 @@ class MainActivity : AppCompatActivity() {
         turnOnDisplayPermanently()
         // 뷰모델 초기화
         initViewModel()
-        // 동적으로 리시버 등록하기.
+        // Register the receiver for vibration service
         registerVibratorReceiver()
+        // Init Alarm Manager that ringing when time is end.
         initAlarmManager()
         initAlarmPendingIntent()
         registerTimeReceiver()
@@ -134,7 +134,7 @@ class MainActivity : AppCompatActivity() {
         binding.pauseBtn.visibility = View.VISIBLE
         setAlarmManager()
 
-        val intent = Intent(this, AlarmService()::class.java)
+        val intent = Intent(this, TimerService()::class.java)
         intent.putExtra("time", timerViewModel.remainTime.value!!)
 
         startForegroundService(intent)
@@ -145,7 +145,8 @@ class MainActivity : AppCompatActivity() {
         binding.startBtn.visibility = View.VISIBLE
         binding.pauseBtn.visibility = View.INVISIBLE
         alarmManager.cancel(mPendingIntent)
-        timerViewModel.stopTimer()
+
+//        timerViewModel.stopTimer()
     }
 
     private fun pauseTimer() {

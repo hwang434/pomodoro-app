@@ -10,7 +10,7 @@ import com.example.pomodoro.R
 import com.example.pomodoro.util.LongToTime
 import com.example.pomodoro.views.MainActivity
 
-class AlarmService : Service() {
+class TimerService : Service() {
     companion object {
         private const val TAG: String = "로그"
         private const val TIME_CAST = "com.example.pomodoro.TICK"
