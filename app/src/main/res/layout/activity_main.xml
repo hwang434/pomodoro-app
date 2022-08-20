@@ -5,7 +5,7 @@
     <data>
         <variable
             name="timerViewModel"
-            type="com.example.pomodoro.viewmodels.TimerViewModel" />
+            type="com.example.pomodoro.viewmodel.TimerViewModel" />
     </data>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -17,7 +17,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="160dp"
-            android:text="아무것도 안함"
+            android:text="@string/nothing_to_do"
             android:textColor="#D6E8D3"
             android:textSize="30sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -30,9 +30,9 @@
             android:layout_marginTop="48dp"
             android:ems="10"
             android:gravity="center_horizontal"
-            android:inputType="time"
             android:textAlignment="center"
             android:textSize="50sp"
+            android:visibility="visible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -43,11 +43,11 @@
             style="@style/button_style"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="136dp"
+            android:layout_marginTop="48dp"
             android:text="@string/timer_start_btn"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/timeView"
+            app:layout_constraintTop_toBottomOf="@id/pomodoroStatus"
             android:background="@drawable/rounded_button" />
         <Button
             android:id="@+id/pauseBtn"
@@ -56,7 +56,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="48dp"
             android:background="@drawable/rounded_button"
-            android:text="일시정지"
+            android:text="@string/pause"
             android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -67,7 +67,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/rounded_button"
-            android:text="정지"
+            android:text="@string/stop"
             android:layout_marginTop="30dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -78,8 +78,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="false"
-            android:textOn="휴식 시간"
-            android:textOff="공부 시간"
+            android:textOn="@string/break_time"
+            android:textOff="@string/study_time"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
