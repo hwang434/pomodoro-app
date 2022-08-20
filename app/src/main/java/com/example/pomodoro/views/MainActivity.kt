@@ -32,9 +32,11 @@ class MainActivity : AppCompatActivity() {
     // 알람 매니저
     private lateinit var alarmManager: AlarmManager
     // PendingIntent
-    private lateinit var mPendingIntent: PendingIntent
+    private lateinit var vibratorPendingIntent: PendingIntent
     // Tick BroadCast
     private lateinit var tickBroadCastReceiver: BroadcastReceiver
+    private lateinit var vibratorReceiverIntent: Intent
+    private lateinit var timerServiceIntent: Intent
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG, "MainActivity - onCreate() called")
@@ -120,38 +122,47 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG,"MainActivity - startTimer() called")
         binding.startBtn.visibility = View.INVISIBLE
         binding.pauseBtn.visibility = View.VISIBLE
+
         setAlarmManager()
+        startTimerService()
+    }
 
-        val intent = Intent(this, TimerService()::class.java)
-        intent.putExtra("time", timerViewModel.remainTime.value!!)
 
-        startForegroundService(intent)
+
+    private fun startTimerService() {
+        timerServiceIntent = Intent(this, TimerService()::class.java)
+        timerServiceIntent.putExtra("time", timerViewModel.remainTime.value!!)
+        startForegroundService(timerServiceIntent)
     }
 
     private fun stopTimer() {
         Log.d(TAG,"MainActivity - stopTimer() called")
         binding.startBtn.visibility = View.VISIBLE
         binding.pauseBtn.visibility = View.INVISIBLE
-        alarmManager.cancel(mPendingIntent)
 
-//        timerViewModel.stopTimer()
+        alarmManager.cancel(vibratorPendingIntent)
+        stopService(vibratorReceiverIntent)
+        stopService(timerServiceIntent)
+
+        timerViewModel.stopTimer()
     }
 
     private fun pauseTimer() {
         Log.d(TAG,"MainActivity - pauseTimer() called")
         binding.startBtn.visibility = View.VISIBLE
         binding.pauseBtn.visibility = View.INVISIBLE
-        alarmManager.cancel(mPendingIntent)
+        alarmManager.cancel(vibratorPendingIntent)
         timerViewModel.pauseTimer()
     }
 
     private fun setAlarmManager() {
         Log.d(TAG,"MainActivity - setAlarmManager() called")
+        Log.d(TAG,"MainActivity - time : ${timerViewModel.remainTime.value!!}")
 
         alarmManager.setExactAndAllowWhileIdle(
             AlarmManager.ELAPSED_REALTIME_WAKEUP,
             SystemClock.elapsedRealtime() + timerViewModel.remainTime.value!!,
-            mPendingIntent
+            vibratorPendingIntent
         )
     }
 
@@ -171,7 +182,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun registerVibratorReceiver() {
-        Log.d(TAG,"MainActivity - registerAlarmReceiver() called")
+        Log.d(TAG,"MainActivity - registerVibratorReceiver() called")
         val vibratorReceiver = VibratorReceiver()
         val intentFilter = IntentFilter(VibratorReceiver.VIBRATOR_CAST)
         registerReceiver(vibratorReceiver, intentFilter)
@@ -184,10 +195,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun initAlarmPendingIntent() {
         Log.d(TAG,"MainActivity - initAlarmPendingIntent() called")
-        val alarmIntent = Intent(VibratorReceiver.VIBRATOR_CAST)
-        mPendingIntent = PendingIntent.getBroadcast(this,
+        vibratorReceiverIntent = Intent(this, VibratorReceiver::class.java)
+
+        vibratorPendingIntent = PendingIntent.getBroadcast(this,
             0,
-            alarmIntent,
+            vibratorReceiverIntent,
             PendingIntent.FLAG_IMMUTABLE
         )
     }
